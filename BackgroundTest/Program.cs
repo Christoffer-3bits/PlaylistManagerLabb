@@ -8,7 +8,9 @@ var _playlistService = new PlaylistService(playlistRepository);
 
 while (true)
 {
+    Console.WriteLine("Choose an option:");
     Console.WriteLine("1. Display full list");
+    Console.WriteLine("2. Create new playlist");
     Console.WriteLine("E. Exit");
 
     var input = Console.ReadLine().ToUpper();

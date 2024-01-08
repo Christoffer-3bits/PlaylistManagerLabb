@@ -5,15 +5,14 @@ namespace DataAccess
 {
     public class MusicDbContext : DbContext
     {
-        public class ApplicationDbContext : DbContext
-        {
+        
             public DbSet<Playlist> Playlists { get; set; }
 
-            public ApplicationDbContext()
+            public MusicDbContext()
             {
             }
 
-            public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            public MusicDbContext(DbContextOptions<MusicDbContext> options)
                 : base(options)
             {
             }
@@ -25,6 +24,6 @@ namespace DataAccess
                     optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=PlaylistsDb;Trusted_Connection=True;");
                 }
             }
-        }
+        
     }
 }
