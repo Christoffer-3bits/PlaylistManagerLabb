@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,16 @@ namespace DataAccess.Repositories
 {
     public class TrackRepository
     {
+        private readonly MusicDbContext _context;
+
+        public TrackRepository(MusicDbContext context)
+        {
+            _context = context;
+        }
+
+        public IEnumerable<Track> GetAll()
+        {
+            return _context.Tracks.ToList();
+        }
     }
 }
