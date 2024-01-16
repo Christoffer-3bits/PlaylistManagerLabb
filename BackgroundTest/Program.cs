@@ -1,6 +1,7 @@
 ﻿using DataAccess;
 using DataAccess.Interface;
 using DataAccess.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Interfaces;
 using Services.Services;
@@ -10,16 +11,22 @@ class Program
 {
     static void Main(string[] args)
     {
-        var services = new ServiceCollection();
-
-        services.AddScoped<IPlaylistRepository, PlaylistRepository>();
-        services.AddScoped<ITrackRepository, TrackRepository>();
-        services.AddScoped<IPlaylistService, PlaylistService>();
-        services.AddScoped<ITrackService, TrackService>();
-
+        ServiceCollection services = new ServiceCollection();
+        ConfigureServices(services);
         var provider = services.BuildServiceProvider();
 
         MainMenu(provider);
+    }
+
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddDbContext<MusicDbContext>();
+
+        services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+        services.AddScoped<ITrackRepository, TrackRepository>();
+        services.AddScoped<IPlaylistTrackRepository, PlaylistTrackRepository>();
+        services.AddScoped<IPlaylistService, PlaylistService>();
+        services.AddScoped<ITrackService, TrackService>();
     }
 
     static void MainMenu(IServiceProvider provider)
@@ -40,6 +47,8 @@ class Program
             {
                 case "1":
                     DisplayFullList(_playlistService);
+                    Console.WriteLine("Press any key to continue");
+                    Console.ReadKey();
                     break;
                 case "E":
                     return;
@@ -64,7 +73,6 @@ class Program
     {
         var _playlistService = provider.GetRequiredService<IPlaylistService>();
         DisplayFullList(_playlistService);
-        Console.WriteLine("Please select a playlist:");
         var selectedPlaylist = Console.ReadLine();
 
         int playlistId;
@@ -78,6 +86,7 @@ class Program
         {
             Console.Clear();
             DisplayTracksInPlaylist(playlistId, provider);
+
 
             Console.WriteLine("1. Add track");
             Console.WriteLine("2. Remove track");
@@ -107,7 +116,6 @@ class Program
         }
     }
 
-
     #region display
     static void DisplayFullList(IPlaylistService _playlistService)
     {
@@ -117,10 +125,6 @@ class Program
         {
             Console.WriteLine($" {playlist.PlaylistId}, Name: {playlist.Name}");
         }
-
-        Console.WriteLine("To display tracks inside a playlist, enter the playlist ID, or 'C' to cancel:");
-
-
     }
 
     static void DisplayTracksInPlaylist(int playlistId, IServiceProvider provider)

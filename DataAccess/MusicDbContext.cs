@@ -10,10 +10,6 @@ namespace DataAccess
             public DbSet<Track> Tracks { get; set; }
             public DbSet<PlaylistTrack> PlaylistTracks { get; set; }
 
-            public MusicDbContext()
-            {
-            }
-
             public MusicDbContext(DbContextOptions<MusicDbContext> options)
                 : base(options)
             {
@@ -21,11 +17,28 @@ namespace DataAccess
 
             protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
-                if (!optionsBuilder.IsConfigured)
-                {
-                    optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=PlaylistsDb;Trusted_Connection=True;");
-                }
+                optionsBuilder.UseInMemoryDatabase("MusicDb");
+                //if (!optionsBuilder.IsConfigured)
+                //{
+                //    optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=PlaylistsDb;Trusted_Connection=True;");
+                //}
             }
-        
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PlaylistTrack>()
+                .HasKey(pt => new { pt.PlaylistId, pt.TrackId }); // Composite key
+
+            modelBuilder.Entity<PlaylistTrack>()
+                .HasOne(pt => pt.Playlist)
+                .WithMany() // No navigation property here
+                .HasForeignKey(pt => pt.PlaylistId);
+
+            modelBuilder.Entity<PlaylistTrack>()
+                .HasOne(pt => pt.Track)
+                .WithMany() // No navigation property here
+                .HasForeignKey(pt => pt.TrackId);
+        }
+
     }
 }
