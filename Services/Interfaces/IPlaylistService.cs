@@ -11,5 +11,6 @@ namespace Services.Interfaces
     {
         IEnumerable<Playlist> GetAllPlaylists();
         void CreatePlaylist(Playlist newPlaylist);
+        void AddTrackToPlaylist(int playlistId, int trackId);
     }
 }

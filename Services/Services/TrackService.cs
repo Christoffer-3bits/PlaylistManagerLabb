@@ -1,4 +1,6 @@
-﻿using DataAccess.Repositories;
+﻿using DataAccess.Interface;
+using DataAccess.Repositories;
+using Services.Interfaces;
 using Shared.Models;
 using System;
 using System.Collections.Generic;
@@ -8,9 +10,14 @@ using System.Threading.Tasks;
 
 namespace Services.Services
 {
-    public class TrackService
+    public class TrackService : ITrackService
     {
-        private readonly TrackRepository _trackRepository;
+        private readonly ITrackRepository _trackRepository;
+
+        public TrackService(ITrackRepository trackRepository)
+        {
+            _trackRepository = trackRepository;
+        }
 
         public List<Track> SearchTracks(string criteria)
         {

@@ -1,4 +1,5 @@
-﻿using Shared.Models;
+﻿using DataAccess.Interface;
+using Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Repositories
 {
-    public class TrackRepository
+    public class TrackRepository : ITrackRepository
     {
         private readonly MusicDbContext _context;
 

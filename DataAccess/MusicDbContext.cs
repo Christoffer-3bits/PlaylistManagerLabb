@@ -7,6 +7,7 @@ namespace DataAccess
     {
         
             public DbSet<Playlist> Playlists { get; set; }
+            public DbSet<Track> Tracks { get; set; }
 
             public MusicDbContext()
             {
