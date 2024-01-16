@@ -1,7 +1,6 @@
 ﻿using DataAccess;
 using DataAccess.Interface;
 using DataAccess.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Interfaces;
 using Services.Services;
@@ -73,6 +72,7 @@ class Program
     {
         var _playlistService = provider.GetRequiredService<IPlaylistService>();
         DisplayFullList(_playlistService);
+        Console.WriteLine("Please select a playlist:");
         var selectedPlaylist = Console.ReadLine();
 
         int playlistId;
@@ -84,7 +84,9 @@ class Program
 
         while (true)
         {
+            var playlistName = provider.GetRequiredService<IPlaylistRepository>().GetById(playlistId).Name;
             Console.Clear();
+            Console.WriteLine($"current playlist: {playlistName}");
             DisplayTracksInPlaylist(playlistId, provider);
 
 
@@ -211,6 +213,7 @@ class Program
 
         while (true)
         {
+            DisplayTracksInPlaylist(playlistId, provider);
             Console.WriteLine("Enter the ID of the track you want to remove, or 'C' to cancel:");
             var input = Console.ReadLine();
 
