@@ -27,5 +27,22 @@ namespace DataAccess.Repositories
             _context.Playlists.Add(playlist);
             _context.SaveChanges();
         }
+        public Playlist GetById(int id)
+        {
+            return _context.Playlists.FirstOrDefault(p => p.PlaylistId == id);
+        }
+
+        public void Update(Playlist playlist)
+        {
+            _context.Playlists.Update(playlist);
+            _context.SaveChanges();
+        }
+
+        public void Delete(Playlist playlist)
+        {
+            _context.Playlists.Remove(playlist);
+            _context.SaveChanges();
+        }
+
     }
 }

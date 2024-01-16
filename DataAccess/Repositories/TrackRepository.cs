@@ -21,5 +21,9 @@ namespace DataAccess.Repositories
         {
             return _context.Tracks.ToList();
         }
+        public Track GetById(int id)
+        {
+            return _context.Tracks.FirstOrDefault(t => t.TrackId == id);
+        }
     }
 }

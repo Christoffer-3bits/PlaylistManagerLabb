@@ -10,5 +10,6 @@ namespace DataAccess.Interface
     public interface ITrackRepository
     {
         IEnumerable<Track> GetAll();
+        Track GetById(int id);
     }
 }

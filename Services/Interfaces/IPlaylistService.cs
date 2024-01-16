@@ -12,5 +12,7 @@ namespace Services.Interfaces
         IEnumerable<Playlist> GetAllPlaylists();
         void CreatePlaylist(Playlist newPlaylist);
         void AddTrackToPlaylist(int playlistId, int trackId);
+        void UpdatePlaylistName(int playlistId, string newName);
+        void DeletePlaylist(int playlistId);
     }
 }

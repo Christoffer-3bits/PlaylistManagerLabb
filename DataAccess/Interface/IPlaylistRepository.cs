@@ -11,5 +11,8 @@ namespace DataAccess.Interface
     {
         IEnumerable<Playlist> GetAll();
         void Add(Playlist playlist);
+        void Update(Playlist playlist);
+        void Delete(Playlist playlist);
+        Playlist GetById(int id);
     }
 }

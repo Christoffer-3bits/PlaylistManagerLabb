@@ -19,20 +19,19 @@ class Program
 
         var provider = services.BuildServiceProvider();
 
-        var _playlistService = provider.GetRequiredService<IPlaylistService>();
-        var _trackService = provider.GetRequiredService<ITrackService>();
-        var playlistRepository = provider.GetRequiredService<IPlaylistRepository>();
-
-        MainMenu(_playlistService, playlistRepository ,_trackService);
+        MainMenu(provider);
     }
 
-    static void MainMenu(IPlaylistService _playlistService, IPlaylistRepository playlistRepository, ITrackService _trackService)
+    static void MainMenu(IServiceProvider provider)
     {
+        var _playlistService = provider.GetRequiredService<IPlaylistService>();
         while (true)
         {
             Console.WriteLine("Choose an option:");
             Console.WriteLine("1. Display full list");
             Console.WriteLine("2. Create new playlist");
+            Console.WriteLine("3. Edit playlist");
+            Console.WriteLine("4. Delete a playlist");
             Console.WriteLine("E. Exit");
 
             var input = Console.ReadLine().ToUpper();
@@ -48,7 +47,7 @@ class Program
                     CreateNewPlaylist(_playlistService);
                     break;
                 case "3":
-                    UpdatePlaylistSubMenu(_playlistService, playlistRepository);
+                    UpdatePlaylistSubMenu(provider);
                     break;
                 case "4":
                     DeletePlaylist(_playlistService);
@@ -61,8 +60,9 @@ class Program
         }
     }
 
-    static void UpdatePlaylistSubMenu(IPlaylistService _playlistService, IPlaylistRepository playlistRepository)
+    static void UpdatePlaylistSubMenu(IServiceProvider provider)
     {
+        var _playlistService = provider.GetRequiredService<IPlaylistService>();
         DisplayFullList(_playlistService);
         Console.WriteLine("Please select a playlist:");
         var selectedPlaylist = Console.ReadLine();
@@ -77,7 +77,7 @@ class Program
         while (true)
         {
             Console.Clear();
-            DisplayTracksInPlaylist(playlistId, playlistRepository);
+            DisplayTracksInPlaylist(playlistId, provider);
 
             Console.WriteLine("1. Add track");
             Console.WriteLine("2. Remove track");
@@ -89,10 +89,10 @@ class Program
             switch (input)
             {
                 case "1":
-                    AddTrackToPlaylist(_playlistService, _trackService, playlistId);
+                    AddTrackToPlaylist(provider, playlistId);
                     break;
                 case "2":
-                    RemoveTrackFromPlaylist(_playlistService, playlistId);
+                    RemoveTrackFromPlaylist(provider, playlistId);
                     break;
                 case "3":
                     UpdatePlaylistName(_playlistService, playlistId);
@@ -117,11 +117,17 @@ class Program
         {
             Console.WriteLine($" {playlist.PlaylistId}, Name: {playlist.Name}");
         }
+
+        Console.WriteLine("To display tracks inside a playlist, enter the playlist ID, or 'C' to cancel:");
+
+
     }
 
-    static void DisplayTracksInPlaylist(int playlistId, IPlaylistRepository playlistRepository)
+    static void DisplayTracksInPlaylist(int playlistId, IServiceProvider provider)
     {
-        // First, check if the playlist exists
+        var playlistRepository = provider.GetRequiredService<IPlaylistRepository>();
+        var playlistTrackRepository = provider.GetRequiredService<IPlaylistTrackRepository>();
+
         var playlist = playlistRepository.GetById(playlistId);
 
         if (playlist == null)
@@ -162,8 +168,11 @@ class Program
         _playlistService.CreatePlaylist(newPlaylist);
     }
 
-    static void AddTrackToPlaylist(IPlaylistService _playlistService, ITrackService _trackService, int playlistId)
+    static void AddTrackToPlaylist(IServiceProvider provider, int playlistId)
     {
+        var _playlistService = provider.GetRequiredService<IPlaylistService>();
+        var _trackService = provider.GetRequiredService<ITrackService>();
+
         while (true)
         {
             Console.WriteLine("Search for a track to add, or 'C' to cancel:");
@@ -191,31 +200,91 @@ class Program
         }
     }
 
-    static void RemoveTrackFromPlaylist(IPlaylistService _playlistService, int playListId)
+    static void RemoveTrackFromPlaylist(IServiceProvider provider, int playlistId)
     {
+        var _playlistTrackRepository = provider.GetRequiredService<IPlaylistTrackRepository>();
+        var _trackService = provider.GetRequiredService<ITrackService>();
 
-    }
+        while (true)
+        {
+            Console.WriteLine("Enter the ID of the track you want to remove, or 'C' to cancel:");
+            var input = Console.ReadLine();
 
-    static void UpdatePlaylistName(IPlaylistService _playlistService, int playListId)
+            if (input.ToUpper() == "C")
+            {
+                return;
+            }
+
+            int trackId;
+            if (!int.TryParse(input, out trackId))
+            {
+                Console.WriteLine("Invalid input. Please enter a number.");
+                continue;
+            }
+
+            var playlistTrack = _playlistTrackRepository.GetByPlaylistIdAndTrackId(playlistId, trackId);
+            if (playlistTrack == null)
+            {
+                Console.WriteLine("No track with this ID found in the playlist.");
+                continue;
+            }
+
+            _playlistTrackRepository.Remove(playlistTrack);
+
+            Console.WriteLine("Track removed successfully.");
+            return;
+        }
+
+    } 
+
+    static void UpdatePlaylistName(IPlaylistService _playlistService, int playlistId)
     {
+        Console.WriteLine("Enter the new name for the playlist:");
+        var newName = Console.ReadLine();
+        if (newName != null)
+        {
+            _playlistService.UpdatePlaylistName(playlistId, newName);
+        } else
+        {
+            Console.WriteLine("Invalid input. Please enter a name.");
+            return;
+        }
 
+        Console.WriteLine("Playlist name updated successfully.");
     }
 
     static void DeletePlaylist(IPlaylistService _playlistService)
     {
+        DisplayFullList(_playlistService);
+        Console.WriteLine("Please select a playlist:");
+        var selectedPlaylist = Console.ReadLine();
+        
+        int playlistId;
+        if (!int.TryParse(selectedPlaylist, out playlistId))
+        {
+            Console.WriteLine("Invalid input. Please enter a number.");
+            return;
+        }
 
+        _playlistService.DeletePlaylist(playlistId);
+
+        Console.WriteLine("Playlist deleted successfully.");
     }
 
     static void SearchTracks(ITrackService _trackService)
     {
         while (true)
         {
-            Console.WriteLine("Enter search criteria (name, artist, genre), or 'C' to cancel:");
+            Console.WriteLine("Enter search criteria (TrackName, artist, genre), or 'C' to cancel:");
             var criteria = Console.ReadLine();
 
             if (criteria.ToUpper() == "C")
             {
                 return;
+            } else if (criteria == null)
+            {
+                Console.WriteLine("Invalid input. Please enter a search term.");
+                continue;
             }
 
             var tracks = _trackService.SearchTracks(criteria);

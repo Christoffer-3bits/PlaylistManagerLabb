@@ -61,5 +61,33 @@ namespace Services.Services
 
             Console.WriteLine("Track added to playlist successfully.");
         }
+
+        public void RemoveTrackFromPlaylist(int playlistId, int trackId)
+        {
+            var playlistTrack = _playlistTrackRepository.GetByPlaylistIdAndTrackId(playlistId, trackId);
+            if (playlistTrack != null)
+            {
+                _playlistTrackRepository.Remove(playlistTrack);
+            }
+        }
+
+        public void UpdatePlaylistName(int playlistId, string newName)
+        {
+            var playlist = _playlistRepository.GetById(playlistId);
+            if (playlist != null)
+            {
+                playlist.Name = newName;
+                _playlistRepository.Update(playlist);
+            }
+        }
+
+        public void DeletePlaylist(int playlistId)
+        {
+            var playlist = _playlistRepository.GetById(playlistId);
+            if (playlist != null)
+            {
+                _playlistRepository.Delete(playlist);
+            }
+        }
     }
 }
