@@ -26,8 +26,13 @@ namespace Services.Services
             return _playlistRepository.GetAll();
         }
 
-        public void CreatePlaylist(Playlist newPlaylist)
+        public void CreatePlaylist(string name)
         {
+            var newPlaylist = new Playlist
+            {
+                Name = name
+            };
+
             _playlistRepository.Add(newPlaylist);
         }
 
@@ -88,6 +93,12 @@ namespace Services.Services
             {
                 _playlistRepository.Delete(playlist);
             }
+        }
+
+        public string GetPlaylistNameById(int id)
+        {
+            var playlist = _playlistRepository.GetById(id);
+            return playlist?.Name;
         }
     }
 }

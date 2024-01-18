@@ -4,7 +4,6 @@ using DataAccess.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Interfaces;
 using Services.Services;
-using Shared.Models;
 
 class Program
 {
@@ -19,15 +18,19 @@ class Program
 
     private static void ConfigureServices(IServiceCollection services)
     {
+        //Modifiera ConnectionString i MusicDbContext för anslutning till DB
         services.AddDbContext<MusicDbContext>();
 
-        services.AddScoped<IPlaylistRepository, PlaylistRepository>();
-        services.AddScoped<ITrackRepository, TrackRepository>();
-        services.AddScoped<IPlaylistTrackRepository, PlaylistTrackRepository>();
+        //Services
         services.AddScoped<IPlaylistService, PlaylistService>();
         services.AddScoped<ITrackService, TrackService>();
+        //Repos
+        services.AddScoped<ITrackRepository, TrackRepository>();
+        services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+        services.AddScoped<IPlaylistTrackRepository, PlaylistTrackRepository>();
     }
 
+    #region menus
     static void MainMenu(IServiceProvider provider)
     {
         var _playlistService = provider.GetRequiredService<IPlaylistService>();
@@ -84,7 +87,7 @@ class Program
 
         while (true)
         {
-            var playlistName = provider.GetRequiredService<IPlaylistRepository>().GetById(playlistId).Name;
+            var playlistName = _playlistService.GetPlaylistNameById(playlistId);
             Console.Clear();
             Console.WriteLine($"current playlist: {playlistName}");
             DisplayTracksInPlaylist(playlistId, provider);
@@ -117,6 +120,7 @@ class Program
             }
         }
     }
+    #endregion
 
     #region display
     static void DisplayFullList(IPlaylistService _playlistService)
@@ -131,10 +135,10 @@ class Program
 
     static void DisplayTracksInPlaylist(int playlistId, IServiceProvider provider)
     {
-        var playlistRepository = provider.GetRequiredService<IPlaylistRepository>();
+        var playlistService = provider.GetRequiredService<IPlaylistService>();
         var playlistTrackRepository = provider.GetRequiredService<IPlaylistTrackRepository>();
 
-        var playlist = playlistRepository.GetById(playlistId);
+        var playlist = playlistService.GetPlaylistNameById(playlistId);
 
         if (playlist == null)
         {
@@ -160,18 +164,18 @@ class Program
 
     #endregion
 
-
     static void CreateNewPlaylist(IPlaylistService _playlistService)
     {
         Console.WriteLine("Enter name of new playlist");
         var name = Console.ReadLine();
 
-        var newPlaylist = new Playlist
+        if (string.IsNullOrEmpty(name))
         {
-            Name = name
-        };
+            Console.WriteLine("Playlist name cannot be empty.");
+            return;
+        }
 
-        _playlistService.CreatePlaylist(newPlaylist);
+        _playlistService.CreatePlaylist(name);
     }
 
     static void AddTrackToPlaylist(IServiceProvider provider, int playlistId)
@@ -209,7 +213,6 @@ class Program
     static void RemoveTrackFromPlaylist(IServiceProvider provider, int playlistId)
     {
         var _playlistTrackRepository = provider.GetRequiredService<IPlaylistTrackRepository>();
-        var _trackService = provider.GetRequiredService<ITrackService>();
 
         while (true)
         {
